@@ -1,0 +1,207 @@
+import React from 'react'
+import Prism from 'prismjs'
+import 'prismjs/themes/prism.css'
+import 'prismjs/components/prism-clike'
+import 'prismjs/components/prism-javascript'
+import './App.css'
+
+
+const algorithm = {
+  title: 'Problem solving:',
+  name: 'Minimum Absolute Difference in an Array',
+}
+const note = {
+  title: 'Note',
+  text: 'This is note.'
+}
+
+function CodeBar({language}) {
+  const [code, setCode] = React.useState('')
+  const [error, setError] = React.useState('')
+  const codeRef = React.useRef(null)
+
+  React.useEffect(() => {
+    fetch('/api/code')
+      .then(res => {
+        console.log('res: ', res)
+        if (!res.ok) {
+          return res.json().then(err => {
+            throw new Error(`HTTP error! status: ${res.status}: ${err.error}`)
+          })
+        } else {
+          return res.json()
+        }
+      })
+      .then(data => {
+        console.log('data: ', data)
+        setCode(data.content)
+        setError(null)
+      })
+      .catch(error => {
+        console.log('Error fetching file content:', error)
+        setError(error.message)
+      })
+
+  }, [])
+
+  React.useEffect(() => {
+    if (code && codeRef.current) {
+      Prism.highlightElement(codeRef.current)
+    }
+  }, [code, language])
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
+
+  return (
+    <div className="
+      relative
+      isolat
+      overflow-hidden
+      bg-red-50
+      px-6
+      py-24
+      sm:py-32
+      lg:overflow-visible
+      lg:px-0"
+    >
+      <div className="
+        mx-auto
+        grid
+        max-w-2xl
+        grid-cols-1
+        gap-x-8
+        gap-y-16
+        lg:mx-0
+        lg:max-w-none
+        lg:grid-cols-2
+        lg:items-start
+        lg:gap-y-10"
+      >
+        <div className="
+          lg:col-span-2
+          lg:col-start-1
+          lg:row-start-1
+          lg:mx-auto
+          lg:grid
+          lg:w-full
+          lg:max-w-7xl
+          lg:grid-cols-2
+          lg:gap-x-8 lg:px-8"
+        >
+          <div className="lg:pr-4">
+            <div className="lg:max-w-lg">
+              <p className="
+                text-base/7
+                font-semibold
+                text-green-600"
+              >
+                {algorithm.title}
+              </p>
+              <h1 className="
+                mt-2
+                text-4xl
+                font-semibold
+                tracking-tight
+                text-pretty
+                text-gray-900
+                sm:text-5xl"
+              >
+                {algorithm.name}
+              </h1>
+            </div>
+          </div>
+        </div>
+        <div className="
+            lg:col-span-2
+            lg:col-start-1
+            lg:row-start-2
+            lg:mx-auto
+            lg:grid
+            lg:w-full
+            lg:max-w-7xl
+            lg:grid-cols-2
+            lg:gap-x-8
+            lg:px-8"
+        >
+          <div className="lg:pr-4">
+            <div className="max-w-xl text-base/7 text-gray-700 lg:max-w-lg">
+              <pre>
+                <code ref={codeRef} className={`language-${language}`}>
+                  {code}
+                </code>
+              </pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function NoteBar() {
+  const [noteContent, setNoteContent] = React.useState('')
+  const [error, setError] = React.useState('')
+
+  React.useEffect(() => {
+    fetch('/api/note')
+      .then(res => {
+        console.log('res: ', res)
+        if (!res.ok) {
+          return res.json().then(err => {
+            throw new Error(`HTTP error! status: ${res.status}: ${err.error}`)
+          })
+        } else {
+          return res.json()
+        }
+      })
+      .then(data => {
+        console.log('data: ', data)
+        setNoteContent(data.content)
+        setError(null)
+      })
+      .catch(error => {
+        console.log('Error fetching file content:', error)
+        setError(error.message)
+      })
+  }, [])
+
+  if (error) {
+    return <div>Error: {error}</div>
+  }
+
+  return (
+    <div className="relative isolate overflow-hidden bg-red-100 px-6 py-24 sm:py-32 lg:overflow-visible lg:px-0">
+      <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+        <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+          <div className="lg:pr-4">
+            <div className="lg:max-w-lg">
+              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">{note.title}</h1>
+            </div>
+          </div>
+        </div>
+        <div className="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+          <div className="lg:pr-4">
+            <div className="max-w-xl text-base/7 text-gray-700 lg:max-w-lg">
+              <p>{noteContent}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <>
+      <div className="flex">
+        <CodeBar language="javascript"></CodeBar>
+        <NoteBar></NoteBar>
+      </div>
+    </>
+  )
+}
+
+export default App
