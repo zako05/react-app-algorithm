@@ -2,9 +2,11 @@ import express from 'express'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import mime from 'mime'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+const scriptsDir = path.join(__dirname, 'scripts');
 
 const app = express()
 const port = 5001
@@ -33,6 +35,49 @@ async function serveFile(filePath, res, contentType) {
       })
   }
 }
+
+async function getFileContent(filePath) {
+  try {
+    const data = await fs.promises.readFile(filePath, 'utf8')
+
+    return data
+  } catch (err) {
+    console.log('Error, file not found', err)
+
+    return null
+  }
+}
+
+app.get('/api/algos', async (req, res) => {
+  try {
+    const files = await fs.promises.readdir(scriptsDir)
+    const fileData = {}
+
+    for (let file of files) {
+      const baseName = path.basename(file, path.extname(file))
+
+      if (!fileData[baseName]) {
+        fileData[baseName] = {}
+      }
+
+      const ext = path.extname(file)
+      const contentType = mime.getType(file) || 'application/octet-stream'
+      const content = await getFileContent(path.join(scriptsDir, file))
+
+      if (content !== null) {
+        fileData[baseName][ext.substring(1)] = {
+          content,
+          contentType,
+        }
+      }
+    }
+
+    res.json(fileData)
+  } catch(err) {
+    console.error('Error reading directory:', err)
+    res.status(500).json({ error: 'Failed to read directory' })
+  }
+})
 
 app.get('/api/code', async (req, res) => {
   const filePath = path.join(__dirname, 'scripts', 'anagramCounter.js')
