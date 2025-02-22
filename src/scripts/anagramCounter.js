@@ -15,7 +15,8 @@ export function anagramCounter(dictionary, query) {
   const sortedQuery = sortStringsInArray(query)
 
   for (const word of sortedQuery) {
-    const filteredWords = sortedDictionary.filter(item => item === word)
+    const filteredWords = sortedDictionary
+      .filter(item => item === word)
     matchingWords.push(filteredWords.length)
   }
 
