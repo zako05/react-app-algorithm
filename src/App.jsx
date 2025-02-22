@@ -16,17 +16,12 @@ function ContentPage({ isCode, language, title, content }) {
   }, [content, isCode, language])
 
   const renderedContent = isCode
-    ? <pre className="">
+    ? <pre className=".prism-code-container">
         <code ref={contentRef} className={`language-${language}`}>
           {content}
         </code>
       </pre>
     : <div dangerouslySetInnerHTML={{ __html: marked(content) }} />
-  // const renderedContent = isCode
-  //   ? <SyntaxHighlighter language="javascript" style={vs}>
-  //       {content}
-  //     </SyntaxHighlighter>
-  //   : <div className="markdown-content" dangerouslySetInnerHTML={{ __html: marked(content) }} />
 
   return (
     <div className="flex-1 px-6 py-24 sm:py-32 lg:px-8 bg-red-50">
@@ -59,18 +54,14 @@ function ContentPage({ isCode, language, title, content }) {
 }
 
 function App() {
-  const [code, setCode] = React.useState(null)
-  const [note, setNote] = React.useState(null)
+  const [algorithms, setAlgorithms] = React.useState(null)
   const [error, setError] = React.useState(null)
 
   React.useEffect(() => {
-    Promise.all([
-      fetch('/api/code').then(res => res.json()),
-      fetch('/api/note').then(res => res.json()),
-    ])
-      .then(([codeData, noteData]) => {
-        setCode(codeData.content)
-        setNote(noteData.content)
+    fetch('/api/algos')
+      .then(res => res.json())
+      .then(data => {
+        setAlgorithms(data)
       })
       .catch(err => {
         console.error('Error fetching data:', err)
@@ -82,25 +73,29 @@ function App() {
     return <div>{error}</div>
   }
 
-  if (code === null || note === null) {
+  if (algorithms === null) {
     return <div>loading...</div>
   }
 
   return (
-    <div className="flex">
-      <ContentPage
-        title="Minimum Absolute Difference in an Array"
-        content={code}
-        isCode={true}
-        language="javascript"
-      >
-      </ContentPage>
-      <ContentPage
-        title="Notes"
-        content={note}
-        isCode={false}
-      >
-      </ContentPage>
+    <div className="flex flex-col">
+      {Object.entries(algorithms).map(([algorithmName, content]) => (
+        <div key={algorithmName} className="algorithm-container mb-px">
+          <ContentPage
+            title={algorithmName}
+            content={content.js?.content}
+            isCode={true}
+            language="javascript"
+          >
+          </ContentPage>
+          <ContentPage
+            title='Notes'
+            content={content.md?.content}
+            isCode={false}
+          >
+          </ContentPage>
+        </div>
+      ))}
     </div>
   )
 }
