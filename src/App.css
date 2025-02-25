@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.algorithm-container {
+  display: flex;
+}
+
+.mb-px {
+  margin-bottom: 10px;
+}
